@@ -13,19 +13,18 @@ class ConfigurationWindow;
 class ConfigurationWindow : public QDialog
 {
     Q_OBJECT
+    Configuration *_config;
+    Ui::ConfigurationWindow *ui;
+    QRegExp _urlRegexp;
 
 public slots:
     virtual void accept();
     virtual void setVisible(bool visible);
 
 public:
-    explicit ConfigurationWindow(QWidget *parent = 0);
+    explicit ConfigurationWindow(Configuration *config, QWidget *parent = 0);
     ~ConfigurationWindow();
-    Configuration config;
 
-private:
-    Ui::ConfigurationWindow *ui;
-    QRegExp urlRegexp;
 };
 
 #endif // CONFIGURATIONWINDOW_H
