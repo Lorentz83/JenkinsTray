@@ -6,5 +6,6 @@
         <file alias="running">ico/magicweather/snow.png</file>
         <file alias="success">ico/magicweather/sun.png</file>
         <file alias="failure">ico/magicweather/thunderstorm.png</file>
+        <file alias="appicon">ico/magicweather/app.png</file>
     </qresource>
 </RCC>
