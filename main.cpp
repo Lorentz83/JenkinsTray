@@ -13,20 +13,22 @@ int main(int argc, char** argv){
     }
     QApplication::setQuitOnLastWindowClosed(false);
 
-    Configuration config;
-    ConfigurationWindow configuration(&config);
+    Configuration sharedConfig;
+    ConfigurationWindow configuration(&sharedConfig);
     if ( argc > 1 ) {
-        config.url = argv[1];
+        sharedConfig.url = argv[1];
     }
 
     TrayIcon tray(&configuration);
-    Backend backend(&config);
+    Backend backend(&sharedConfig);
 
     tray.show();
     backend.refresh();
 
+    app.connect(&configuration, &ConfigurationWindow::accepted, &backend, &Backend::refresh);
     app.connect(&tray, &TrayIcon::configure, &configuration, &ConfigurationWindow::show);
     app.connect(&tray, &TrayIcon::refresh, &backend, &Backend::refresh);
+    app.connect(&backend, &Backend::statusUpdated, &tray, &TrayIcon::updateStatus);
 
     return app.exec();
 }

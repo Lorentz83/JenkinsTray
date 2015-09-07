@@ -2,7 +2,10 @@
 #define BACKEND_H
 
 #include "configuration.h"
+#include "jenkinsjob.h"
+
 #include <QNetworkAccessManager>
+#include <QVector>
 
 class Backend : public QObject
 {
@@ -14,6 +17,7 @@ public:
     explicit Backend(Configuration *configuration, QObject *parent = 0);
 
 signals:
+    void statusUpdated(QVector<JenkinsJob>);
 
 private slots:
     void netResponse(QNetworkReply* reply);

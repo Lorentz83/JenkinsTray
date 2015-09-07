@@ -3,8 +3,10 @@
 
 #include <QString>
 
-
-enum class JobStatus{SUCCESS, FAIL, INSTABLE};
+enum class JobStatus{UNKNOWN, RUNNING, INSTABLE, SUCCESS, FAILURE};
+JobStatus parseJob(const QString&);
+QString  toQString(const JobStatus &);
+JobStatus operator&& (JobStatus j1, JobStatus j2);
 
 class JenkinsJob {
 public:

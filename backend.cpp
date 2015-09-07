@@ -4,8 +4,6 @@
 #include <QXmlQuery>
 #include <QBuffer>
 #include <QRegExp>
-#include <QMap>
-#include "jenkinsjob.h"
 
 Backend::Backend(Configuration *configuration, QObject *parent) :
     QObject(parent),
@@ -23,9 +21,11 @@ void Backend::refresh() {
 }
 
 void Backend::netResponse(QNetworkReply* reply){
+    QVector<JenkinsJob> projectsStatus;
 
     if (reply->error() != QNetworkReply::NoError) {
         qDebug() << reply->errorString();
+        emit statusUpdated(projectsStatus);
         return;
     }
 
@@ -47,9 +47,7 @@ void Backend::netResponse(QNetworkReply* reply){
 
     QStringList projects;
     query.evaluateTo(&projects);
-    //qDebug() << projects;
 
-    QMap<QString, JenkinsJob> lastExecution;
 
     QRegExp rx("^(.+) #([0-9]+) \\((.*)\\)$");
     foreach (QString str, projects) {
@@ -61,26 +59,9 @@ void Backend::netResponse(QNetworkReply* reply){
             JobStatus status = JobStatus::SUCCESS;
             QString name = rx.cap(1);
             int buildNumber = rx.cap(2).toInt();
-            if ( lastExecution.value(name).buildNumber < buildNumber) {
-                JenkinsJob job(name, buildNumber, status);
-                lastExecution.insert(name, job);
-            }
+            projectsStatus.append(JenkinsJob(name, buildNumber, status));
         }
     }
-    qDebug() << lastExecution;
-
-/*
-   QXmlItem item(r.next());
-   while (!item.isNull()) {
-       // use item
-       qDebug()<<item.toAtomicValue();
-       item = r.next();
-   }
-   if (r.hasError()) {
-       qDebug()<<"error";
-   }
-*/
-   qDebug()<<"done";
-
-
+    emit statusUpdated(projectsStatus);
+    qDebug()<<"done";
 }
