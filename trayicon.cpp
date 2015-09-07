@@ -4,7 +4,8 @@
 #include <qdebug.h>
 #include <QMap>
 #include <QIcon>
-
+#include <QDesktopServices>
+#include <QUrl>
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
 {
@@ -32,8 +33,15 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
     menu->addSeparator();
     _buildsMenu = menu->addMenu("builds");
     setContextMenu(menu);
+
+    connect(&_urlMapper, SIGNAL(mapped(QString)), this, SLOT(openUrl(QString)));
+
 }
 
+void TrayIcon::openUrl(const QString& url) {
+    qDebug() << "opening "<< url;
+    QDesktopServices::openUrl(QUrl(url));
+}
 
 void TrayIcon::about() {
     QMessageBox::about((QWidget *)parent(), tr("About JenkinsTray"), tr("© 2015, Lorenzo Bossi\n"
@@ -49,8 +57,10 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
     JobStatus globalStatus = JobStatus::UNKNOWN;
 
     foreach(const JenkinsJob job, projects) {
-        _buildsMenu->addAction(_icons.value(job.status), job.name + ": " + toQString(job.status));
+        QAction *action = _buildsMenu->addAction(_icons.value(job.status), job.name + ": " + toQString(job.status));
         globalStatus = globalStatus && job.status;
+        _urlMapper.setMapping(action, job.url);
+        connect(action, SIGNAL(triggered(bool)), &_urlMapper, SLOT(map()));
 
     }
 

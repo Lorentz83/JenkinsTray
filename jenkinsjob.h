@@ -13,14 +13,16 @@ public:
     JenkinsJob(){
         buildNumber = -1;
     }
-    JenkinsJob(QString name, int buildNumber, JobStatus status) {
+    JenkinsJob(QString name, int buildNumber, JobStatus status, QString url) {
         this->name = name;
         this->buildNumber = buildNumber;
         this->status = status;
+        this->url = url;
     }
     QString name;
     int buildNumber;
     JobStatus status;
+    QString url;
 };
 
 

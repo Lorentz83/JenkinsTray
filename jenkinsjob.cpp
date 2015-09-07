@@ -41,7 +41,7 @@ QDebug operator<<(QDebug dbg, const JobStatus &status){
 
 
 QDebug operator<<(QDebug dbg, const JenkinsJob &job){
-    dbg.nospace() << job.name << " #" << job.buildNumber << " " << job.status;
+    dbg.nospace() << job.name << " #" << job.buildNumber << " " << job.status << " " << job.url;
 
     return dbg.maybeSpace();
 }

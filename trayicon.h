@@ -1,15 +1,21 @@
 #ifndef TRAYICON_H
 #define TRAYICON_H
 
-#include "jenkinsjob.h"
 #include <QSystemTrayIcon>
 #include <QMenu>
+#include <QSignalMapper>
+
+#include "jenkinsjob.h"
 
 class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
     QMenu *_buildsMenu;
     QMap<JobStatus, QIcon> _icons;
+    QSignalMapper _urlMapper;
+
+protected slots:
+    void openUrl(const QString& url);
 
 public slots:
     void about();

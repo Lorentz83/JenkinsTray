@@ -2,6 +2,7 @@
 #include <QNetworkReply>
 #include <QTextCodec>
 #include <QXmlQuery>
+#include <QXmlResultItems>
 #include <QBuffer>
 #include <QRegExp>
 #include <QDateTime>
@@ -37,19 +38,19 @@ void Backend::netResponse(QNetworkReply* reply){
     QBuffer buffer(&encoded); // This is a QIODevice.
     buffer.open(QIODevice::ReadOnly);
 
-    QXmlQuery query;
-
-
-    query.bindVariable("rss", &buffer);
-    query.setQuery("declare default element namespace \"http://www.w3.org/2005/Atom\"; "
+    QXmlQuery queryEntry;
+    queryEntry.bindVariable("rss", &buffer);
+    queryEntry.setQuery("declare default element namespace \"http://www.w3.org/2005/Atom\"; "
                    "declare variable $rss external; "
-                   "doc($rss)/feed/entry/title/string()");
+                   "for $entry in doc($rss)/feed/entry "
+                   "return fn:concat($entry/title/string(), ' ', $entry/link[@type='text/html']/@href)");
+
+
+    QRegExp rx("^(.+) #([0-9]+) \\((.*)\\) (http.*)$");
 
     QStringList projects;
-    query.evaluateTo(&projects);
+    queryEntry.evaluateTo(&projects);
 
-
-    QRegExp rx("^(.+) #([0-9]+) \\((.*)\\)$");
     foreach (QString str, projects) {
         if (rx.indexIn(str) == -1) {
             qDebug() << "error parsing " << str;
@@ -57,8 +58,10 @@ void Backend::netResponse(QNetworkReply* reply){
             QString name = rx.cap(1);
             int buildNumber = rx.cap(2).toInt();
             JobStatus status = parseJobStatus(rx.cap(3));
-            projectsStatus.append(JenkinsJob(name, buildNumber, status));
+            QString url = rx.cap(4);
+            projectsStatus.append(JenkinsJob(name, buildNumber, status, url));
         }
     }
+
     emit statusUpdated(projectsStatus, "Last update: " + QDateTime::currentDateTime().toString());
 }
