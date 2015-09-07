@@ -46,6 +46,8 @@ void TrayIcon::openUrl(const QString& url) {
 void TrayIcon::about() {
     QMessageBox::about((QWidget *)parent(), tr("About JenkinsTray"), tr("© 2015, Lorenzo Bossi\n"
                                                                "This program is free software licensed under the GPL v3 or later\n"
+                                                               "To download the source code or report any bug visit\n"
+                                                               "https://github.com/Lorentz83/JenkinsTray\n"
                                                                "Icons by http://iconka.com"));
 }
 
