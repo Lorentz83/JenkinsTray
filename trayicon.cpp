@@ -38,7 +38,7 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
 void TrayIcon::about() {
     QMessageBox::about((QWidget *)parent(), tr("About JenkinsTray"), tr("© 2015, Lorenzo Bossi\n"
                                                                "This program is free software licensed under the GPL v3 or later\n"
-                                                               "Icons are provided by http://iconka.com"));
+                                                               "Icons by http://iconka.com"));
 }
 
 void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &message) {

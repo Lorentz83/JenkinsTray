@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QResource>
 #include <QMessageBox>
+#include <QTimer>
 
 int main(int argc, char** argv){
     QApplication app(argc, argv);
@@ -21,14 +22,21 @@ int main(int argc, char** argv){
 
     TrayIcon tray(&configuration);
     Backend backend(&sharedConfig);
+    QTimer timer;
 
     tray.show();
     backend.refresh();
+    timer.start(sharedConfig.refreshMillisec());
 
-    app.connect(&configuration, &ConfigurationWindow::accepted, &backend, &Backend::refresh);
+    app.connect(&timer, &QTimer::timeout, &backend, &Backend::refresh);
     app.connect(&tray, &TrayIcon::configure, &configuration, &ConfigurationWindow::show);
     app.connect(&tray, &TrayIcon::refresh, &backend, &Backend::refresh);
     app.connect(&backend, &Backend::statusUpdated, &tray, &TrayIcon::updateStatus);
+
+    app.connect(&configuration, &ConfigurationWindow::accepted, [&](){
+        timer.start(sharedConfig.refreshMillisec());
+        backend.refresh();
+    });
 
     return app.exec();
 }

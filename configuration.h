@@ -9,6 +9,9 @@ public:
     int refreshSec;
 
     Configuration();
+    int refreshMillisec() {
+        return refreshSec * 1000;
+    }
 };
 
 
