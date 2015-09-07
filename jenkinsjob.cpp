@@ -6,7 +6,7 @@ JobStatus operator&& (JobStatus j1, JobStatus j2) {
     return j1 > j2 ? j1:j2;
 }
 
-JobStatus parseJob(const QString &str) {
+JobStatus parseJobStatus(const QString &str) {
     if (str == "stable") { //(back to normal)
         return JobStatus::SUCCESS;
     } else if (str.startsWith("broken")) { //(broken since this build) (broken since build #3515)

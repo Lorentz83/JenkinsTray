@@ -4,6 +4,7 @@
 #include <QXmlQuery>
 #include <QBuffer>
 #include <QRegExp>
+#include <QDateTime>
 
 Backend::Backend(Configuration *configuration, QObject *parent) :
     QObject(parent),
@@ -24,8 +25,7 @@ void Backend::netResponse(QNetworkReply* reply){
     QVector<JenkinsJob> projectsStatus;
 
     if (reply->error() != QNetworkReply::NoError) {
-        qDebug() << reply->errorString();
-        emit statusUpdated(projectsStatus);
+        emit statusUpdated(projectsStatus, reply->errorString());
         return;
     }
 
@@ -53,15 +53,12 @@ void Backend::netResponse(QNetworkReply* reply){
     foreach (QString str, projects) {
         if (rx.indexIn(str) == -1) {
             qDebug() << "error parsing " << str;
-
         } else {
-            //qDebug() << rx.cap(1) << rx.cap(2) << rx.cap(3);
-            JobStatus status = JobStatus::SUCCESS;
             QString name = rx.cap(1);
             int buildNumber = rx.cap(2).toInt();
+            JobStatus status = parseJobStatus(rx.cap(3));
             projectsStatus.append(JenkinsJob(name, buildNumber, status));
         }
     }
-    emit statusUpdated(projectsStatus);
-    qDebug()<<"done";
+    emit statusUpdated(projectsStatus, "Last update: " + QDateTime::currentDateTime().toString());
 }

@@ -41,14 +41,15 @@ void TrayIcon::about() {
                                                                "Icons are provided by http://iconka.com"));
 }
 
-void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects) {
+void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &message) {
+    setToolTip(message);
+
     _buildsMenu->clear();
+
     JobStatus globalStatus = JobStatus::UNKNOWN;
 
     foreach(const JenkinsJob job, projects) {
-        qDebug() << job <<_icons.value(job.status).isNull();
-        _buildsMenu->addAction(_icons.value(job.status), job.name);
-        //qDebug() << globalStatus << job.status<< (globalStatus && job.status);
+        _buildsMenu->addAction(_icons.value(job.status), job.name + ": " + toQString(job.status));
         globalStatus = globalStatus && job.status;
 
     }

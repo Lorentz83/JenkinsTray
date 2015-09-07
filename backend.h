@@ -17,7 +17,7 @@ public:
     explicit Backend(Configuration *configuration, QObject *parent = 0);
 
 signals:
-    void statusUpdated(QVector<JenkinsJob>);
+    void statusUpdated(QVector<JenkinsJob>, QString);
 
 private slots:
     void netResponse(QNetworkReply* reply);

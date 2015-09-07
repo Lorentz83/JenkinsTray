@@ -13,7 +13,7 @@ class TrayIcon : public QSystemTrayIcon
 
 public slots:
     void about();
-    void updateStatus(const QVector<JenkinsJob>&);
+    void updateStatus(const QVector<JenkinsJob>&, const QString&);
 
 signals:
     void refresh();

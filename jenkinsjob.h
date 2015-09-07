@@ -4,7 +4,7 @@
 #include <QString>
 
 enum class JobStatus{UNKNOWN, RUNNING, INSTABLE, SUCCESS, FAILURE};
-JobStatus parseJob(const QString&);
+JobStatus parseJobStatus(const QString&);
 QString  toQString(const JobStatus &);
 JobStatus operator&& (JobStatus j1, JobStatus j2);
 
