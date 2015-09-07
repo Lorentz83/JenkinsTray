@@ -15,11 +15,22 @@ Backend::Backend(Configuration *configuration, QObject *parent) :
 
     connect(&_netManager, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(netResponse(QNetworkReply*)));
+
+    connect(&_netManager, &QNetworkAccessManager::sslErrors,
+            this, &Backend::sslError);
 }
 
 void Backend::refresh() {
-    qDebug() << "get "<<_configuration->url;
-    _netManager.get(QNetworkRequest(QUrl(_configuration->url)));
+    QUrl url;
+    if (_configuration->url.endsWith("/rssLatest")) {
+        url = QUrl(_configuration->url);
+    } else {
+        if ( _configuration->url.endsWith('/') )
+            url = QUrl(_configuration->url + "rssLatest" );
+        else
+            url = QUrl(_configuration->url + "/rssLatest" );
+    }
+    _netManager.get(QNetworkRequest(url));
 }
 
 void Backend::netResponse(QNetworkReply* reply){
@@ -49,7 +60,10 @@ void Backend::netResponse(QNetworkReply* reply){
     QRegExp rx("^(.+) #([0-9]+) \\((.*)\\) (http.*)$");
 
     QStringList projects;
-    queryEntry.evaluateTo(&projects);
+    if ( !queryEntry.evaluateTo(&projects) ){
+        emit statusUpdated(projectsStatus, tr("ERROR: the response received does not look from Jenkins"));
+        return;
+    }
 
     foreach (QString str, projects) {
         if (rx.indexIn(str) == -1) {
@@ -64,4 +78,9 @@ void Backend::netResponse(QNetworkReply* reply){
     }
 
     emit statusUpdated(projectsStatus, "Last update: " + QDateTime::currentDateTime().toString());
+}
+
+void Backend::sslError(QNetworkReply *reply, const QList<QSslError> &) {
+    if (_configuration->ignoreSslErrors)
+        reply->ignoreSslErrors();
 }

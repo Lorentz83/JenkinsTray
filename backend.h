@@ -20,6 +20,7 @@ signals:
     void statusUpdated(QVector<JenkinsJob>, QString);
 
 private slots:
+    void sslError(QNetworkReply *reply, const QList<QSslError> &errors);
     void netResponse(QNetworkReply* reply);
 
 public slots:

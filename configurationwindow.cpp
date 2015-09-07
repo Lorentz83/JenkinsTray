@@ -22,6 +22,7 @@ ConfigurationWindow::~ConfigurationWindow()
 void ConfigurationWindow::accept() {
     _config->refreshSec = ui->_refresh->value();
     _config->url = ui->_url->text();
+    _config->ignoreSslErrors = ui->_ignoreSslErrors->isChecked();
     QDialog::accept();
 }
 
@@ -29,6 +30,7 @@ void ConfigurationWindow::setVisible(bool visible) {
     if (visible) {
         ui->_refresh->setValue(_config->refreshSec);
         ui->_url->setText(_config->url);
+        ui->_ignoreSslErrors->setChecked(_config->ignoreSslErrors);
     }
     QDialog::setVisible(visible);
 }

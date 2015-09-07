@@ -7,6 +7,7 @@ class Configuration {
 public:
     QString url;
     int refreshSec;
+    bool ignoreSslErrors;
 
     Configuration();
     int refreshMillisec() {

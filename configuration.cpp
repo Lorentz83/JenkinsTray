@@ -3,4 +3,5 @@
 Configuration::Configuration() {
     url = "http://localhost/jenkins";
     refreshSec = 10;
+    ignoreSslErrors = false;
 }
