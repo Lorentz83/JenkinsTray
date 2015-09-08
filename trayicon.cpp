@@ -26,7 +26,7 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
     action = menu->addAction(parent->style()->standardIcon(QStyle::SP_BrowserReload), tr("&Refresh"));
     connect(action, &QAction::triggered, this, &TrayIcon::refresh);
 
-    action = menu->addAction(parent->style()->standardIcon(QStyle::SP_FileDialogInfoView), tr("&Configure…"));
+    action = menu->addAction(tr("&Configure…"));
     connect(action, &QAction::triggered, this, &TrayIcon::configure);
 
     action = menu->addAction(tr("&About…"));
@@ -43,9 +43,12 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
         QDir tmpDir(_soundDir->path());
         QFile::copy(":/sounds/ko.wav", tmpDir.filePath("ko.wav"));
         QFile::copy(":/sounds/ok.wav", tmpDir.filePath("ok.wav"));
-        _failSound = QUrl::fromLocalFile(tmpDir.filePath("ko.wav"));
-        _successSound = QUrl::fromLocalFile(tmpDir.filePath("ok.wav"));
+        _failSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ko.wav")));
+        _successSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ok.wav")));
+        _failSound.setLoopCount(1); _failSound.setVolume(.25f);
+        _successSound.setLoopCount(1); _successSound.setVolume(.25f);
     }
+
     _lastGlobalStatus = JobStatus::UNKNOWN;
 }
 
@@ -91,13 +94,16 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
 
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
 
-    if (globalStatus == JobStatus::SUCCESS && _lastGlobalStatus == JobStatus::FAILURE)
-        _sound.setSource(_successSound);
-    if (globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE)
-        _sound.setSource(_failSound);
-    _sound.setLoopCount(1);
-    _sound.setVolume(0.25f);
-    _sound.play();
+
+    if ( (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastGlobalStatus == JobStatus::FAILURE) {
+        _successSound.play();
+        qDebug() << "PLAY SUCCESS";
+    }
+    if (globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE) {
+        _failSound.play();
+        qDebug() << "PLAY FAILURE";
+    }
+    qDebug() << "current: " << globalStatus << " previous: "<< _lastGlobalStatus;
 
     _lastGlobalStatus = globalStatus;
     setIcon(_icons.value(globalStatus));

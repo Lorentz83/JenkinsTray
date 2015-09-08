@@ -15,8 +15,7 @@ class TrayIcon : public QSystemTrayIcon
     QMenu *_buildsMenu;
     QMap<JobStatus, QIcon> _icons;
     QSignalMapper _urlMapper;
-    QSoundEffect _sound;
-    QUrl _failSound, _successSound;
+    QSoundEffect _failSound, _successSound;
     QTemporaryDir *_soundDir;
     JobStatus _lastGlobalStatus;
 
