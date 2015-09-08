@@ -8,4 +8,8 @@
         <file alias="failure">ico/magicweather/thunderstorm.png</file>
         <file alias="appicon">ico/magicweather/app.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>sounds/ok.wav</file>
+        <file>sounds/ko.wav</file>
+    </qresource>
 </RCC>

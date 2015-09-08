@@ -4,8 +4,10 @@
 #include <QSystemTrayIcon>
 #include <QMenu>
 #include <QSignalMapper>
-
+#include <QSoundEffect>
 #include "jenkinsjob.h"
+#include <QUrl>
+#include <QTemporaryDir>
 
 class TrayIcon : public QSystemTrayIcon
 {
@@ -13,6 +15,10 @@ class TrayIcon : public QSystemTrayIcon
     QMenu *_buildsMenu;
     QMap<JobStatus, QIcon> _icons;
     QSignalMapper _urlMapper;
+    QSoundEffect _sound;
+    QUrl _failSound, _successSound;
+    QTemporaryDir *_soundDir;
+    JobStatus _lastGlobalStatus;
 
 protected slots:
     void openUrl(const QString& url);
@@ -27,6 +33,7 @@ signals:
 
 public:
     TrayIcon(QWidget *parent = NULL);
+    ~TrayIcon();
 };
 
 

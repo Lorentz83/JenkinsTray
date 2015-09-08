@@ -18,6 +18,7 @@ Backend::Backend(Configuration *configuration, QObject *parent) :
 
     connect(&_netManager, &QNetworkAccessManager::sslErrors,
             this, &Backend::sslError);
+
 }
 
 void Backend::refresh() {

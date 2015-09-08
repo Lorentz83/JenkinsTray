@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml xmlpatterns
+QT       += core gui network xml xmlpatterns multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,7 +27,7 @@ HEADERS  += \
     jenkinsjob.h
 
 RESOURCES += \
-    icons.qrc
+    res.qrc
 
 FORMS += \
     ConfigurationWindow.ui

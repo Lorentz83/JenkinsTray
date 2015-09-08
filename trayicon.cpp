@@ -5,7 +5,8 @@
 #include <QMap>
 #include <QIcon>
 #include <QDesktopServices>
-#include <QUrl>
+
+#include <QDir>
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
 {
@@ -36,6 +37,19 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
 
     connect(&_urlMapper, SIGNAL(mapped(QString)), this, SLOT(openUrl(QString)));
 
+    _soundDir = new QTemporaryDir();
+    if (_soundDir->isValid()) {
+        QDir tmpDir(_soundDir->path());
+        QFile::copy(":/sounds/ko.wav", tmpDir.filePath("ko.wav"));
+        QFile::copy(":/sounds/ok.wav", tmpDir.filePath("ok.wav"));
+        _failSound = QUrl::fromLocalFile(tmpDir.filePath("ko.wav"));
+        _successSound = QUrl::fromLocalFile(tmpDir.filePath("ok.wav"));
+    }
+    _lastGlobalStatus = JobStatus::UNKNOWN;
+}
+
+TrayIcon::~TrayIcon(){
+    delete _soundDir;
 }
 
 void TrayIcon::openUrl(const QString& url) {
@@ -68,5 +82,14 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
 
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
 
+    if (globalStatus == JobStatus::SUCCESS && _lastGlobalStatus == JobStatus::FAILURE)
+        _sound.setSource(_successSound);
+    if (globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE)
+        _sound.setSource(_failSound);
+    _sound.setLoopCount(1);
+    _sound.setVolume(0.25f);
+    _sound.play();
+
+    _lastGlobalStatus = globalStatus;
     setIcon(_icons.value(globalStatus));
 }
