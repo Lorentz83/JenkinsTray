@@ -4,8 +4,7 @@
 ConfigurationWindow::ConfigurationWindow(Configuration *config, QWidget *parent) :
     QDialog(parent),
     _config(config),
-    ui(new Ui::ConfigurationWindow)
-{
+    ui(new Ui::ConfigurationWindow) {
     ui->setupUi(this);
     setWindowIcon(QIcon(":/ico/appicon"));
 
@@ -20,17 +19,17 @@ ConfigurationWindow::~ConfigurationWindow()
 }
 
 void ConfigurationWindow::accept() {
-    _config->refreshSec = ui->_refresh->value();
-    _config->url = ui->_url->text();
-    _config->ignoreSslErrors = ui->_ignoreSslErrors->isChecked();
+    _config->setRefreshSec(ui->_refresh->value());
+    _config->setUrl(ui->_url->text());
+    _config->setIgnoreSslErrors(ui->_ignoreSslErrors->isChecked());
     QDialog::accept();
 }
 
 void ConfigurationWindow::setVisible(bool visible) {
     if (visible) {
-        ui->_refresh->setValue(_config->refreshSec);
-        ui->_url->setText(_config->url);
-        ui->_ignoreSslErrors->setChecked(_config->ignoreSslErrors);
+        ui->_refresh->setValue(_config->refreshSec());
+        ui->_url->setText(_config->url());
+        ui->_ignoreSslErrors->setChecked(_config->ignoreSslErrors());
     }
     QDialog::setVisible(visible);
 }

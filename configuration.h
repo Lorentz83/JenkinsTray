@@ -1,18 +1,22 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#include <QDialog>
+#include <QSettings>
 
-class Configuration {
+class Configuration {    
+    QSettings _settings;
+
 public:
-    QString url;
-    int refreshSec;
-    bool ignoreSslErrors;
-
-    Configuration();
     int refreshMillisec() {
-        return refreshSec * 1000;
+        return refreshSec() * 1000;
     }
+
+    void setUrl(QString url);
+    QString url();
+    void setRefreshSec(int refresh);
+    int refreshSec();
+    void setIgnoreSslErrors(bool val);
+    bool ignoreSslErrors();
 };
 
 

@@ -8,6 +8,10 @@
 
 int main(int argc, char** argv){
     QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("Lorentz83");
+    QCoreApplication::setOrganizationDomain("https://github.com/Lorentz83");
+    QCoreApplication::setApplicationName("JenkinsTray");
+
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         QMessageBox::critical(0, QObject::tr("Systray"), QObject::tr("Cannot detect any system tray."));
         return 1;
@@ -18,15 +22,13 @@ int main(int argc, char** argv){
     Configuration sharedConfig;
     ConfigurationWindow configuration(&sharedConfig);
     if ( argc > 1 ) {
-        sharedConfig.url = argv[1];
+        sharedConfig.setUrl(argv[1]);
         if (argc > 2) {
-            sharedConfig.refreshSec = QString(argv[2]).toInt();
-            if (sharedConfig.refreshSec <= 0)
-                sharedConfig.refreshSec = 1;
+            sharedConfig.setRefreshSec(QString(argv[2]).toInt());
         }
         if (argc > 3) {
             QString ignore(argv[3]);
-            sharedConfig.ignoreSslErrors = ignore.compare("t", Qt::CaseInsensitive) == 0 || ignore.compare("true", Qt::CaseInsensitive) == 0;
+            sharedConfig.setIgnoreSslErrors(ignore.compare("t", Qt::CaseInsensitive) == 0 || ignore.compare("true", Qt::CaseInsensitive) == 0);
         }
     }
 
