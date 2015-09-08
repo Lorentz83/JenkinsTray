@@ -7,6 +7,7 @@
 #include <QDesktopServices>
 
 #include <QDir>
+#include <QStyle>
 
 TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
 {
@@ -22,10 +23,10 @@ TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
     QMenu *menu = new QMenu(parent);
     QAction *action;
 
-    action = menu->addAction(tr("&Refresh"));
+    action = menu->addAction(parent->style()->standardIcon(QStyle::SP_BrowserReload), tr("&Refresh"));
     connect(action, &QAction::triggered, this, &TrayIcon::refresh);
 
-    action = menu->addAction(QIcon(":/ico/sun"), tr("&Configure…"));
+    action = menu->addAction(parent->style()->standardIcon(QStyle::SP_FileDialogInfoView), tr("&Configure…"));
     connect(action, &QAction::triggered, this, &TrayIcon::configure);
 
     action = menu->addAction(tr("&About…"));
@@ -58,11 +59,19 @@ void TrayIcon::openUrl(const QString& url) {
 }
 
 void TrayIcon::about() {
-    QMessageBox::about((QWidget *)parent(), tr("About JenkinsTray"), tr("© 2015, Lorenzo Bossi\n"
-                                                               "This program is free software licensed under the GPL v3 or later\n"
-                                                               "To download the source code or report any bug visit\n"
-                                                               "https://github.com/Lorentz83/JenkinsTray\n"
-                                                               "Icons by http://iconka.com"));
+    QWidget *p = (QWidget *)parent();
+    QMessageBox box(p);
+    box.setTextFormat(Qt::RichText);
+    box.setWindowTitle(tr("About JenkinsTray"));
+    box.setText(tr("© 2015, Lorenzo Bossi\n"
+                   "This program is free software licensed under the <a href='http://www.gnu.org/licenses/gpl-3.0.html'>GPL v3</a> or later."
+                   "<br/><br/>"
+                   "To download the source code or report any bug visit<br/>"
+                   "<a href='https://github.com/Lorentz83/JenkinsTray'>https://github.com/Lorentz83/JenkinsTray</a>"
+                   "<br/><br/>"
+                   "Icons by <a href='http://iconka.com'>http://iconka.com</a>"));
+    box.setIconPixmap(p->windowIcon().pixmap(128));
+    box.exec();
 }
 
 void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &message) {
