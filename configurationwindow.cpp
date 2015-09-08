@@ -6,7 +6,6 @@ ConfigurationWindow::ConfigurationWindow(Configuration *config, QWidget *parent)
     _config(config),
     ui(new Ui::ConfigurationWindow) {
     ui->setupUi(this);
-    setWindowIcon(QIcon(":/ico/appicon"));
 
     _urlRegexp.setPattern("^https?://.*");
     _urlRegexp.setCaseSensitivity(Qt::CaseInsensitive);

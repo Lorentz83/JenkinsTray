@@ -11,6 +11,8 @@ public:
         return refreshSec() * 1000;
     }
 
+    bool firstRun();
+
     void setUrl(QString url);
     QString url();
     void setRefreshSec(int refresh);

@@ -26,3 +26,11 @@ void Configuration::setIgnoreSslErrors(bool val) {
 bool Configuration::ignoreSslErrors() {
     return _settings.value("ignoreSslErrors", false).toBool();
 }
+
+bool Configuration::firstRun() {
+    if ( _settings.value("firstRun", true).toBool() ) {
+        _settings.setValue("firstRun", false);
+        return true;
+    }
+    return false;
+}

@@ -20,8 +20,9 @@ int main(int argc, char** argv){
     QApplication::setQuitOnLastWindowClosed(false);
 
     Configuration sharedConfig;
-    ConfigurationWindow configuration(&sharedConfig);
+    bool showConfiguration = sharedConfig.firstRun();
     if ( argc > 1 ) {
+        showConfiguration = false;
         sharedConfig.setUrl(argv[1]);
         if (argc > 2) {
             sharedConfig.setRefreshSec(QString(argv[2]).toInt());
@@ -32,11 +33,15 @@ int main(int argc, char** argv){
         }
     }
 
+    ConfigurationWindow configuration(&sharedConfig);
     TrayIcon tray(&configuration);
     Backend backend(&sharedConfig);
     QTimer timer;
 
     tray.show();
+    if ( showConfiguration )
+        configuration.show();
+
     backend.refresh();
     timer.start(sharedConfig.refreshMillisec());
 

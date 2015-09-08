@@ -6,12 +6,22 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>608</width>
+    <width>500</width>
     <height>159</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>JenkinsTray configuration</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/ico/appicon</normaloff>:/ico/appicon</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -81,7 +91,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
