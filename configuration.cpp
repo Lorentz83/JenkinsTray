@@ -34,3 +34,11 @@ bool Configuration::firstRun() {
     }
     return false;
 }
+
+void Configuration::setPlaySounds(bool val) {
+    _settings.setValue("playSounds", val);
+}
+
+bool Configuration::playSounds() {
+    return _settings.value("playSounds", true).toBool();
+}

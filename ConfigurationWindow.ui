@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>159</height>
+    <height>173</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -72,6 +72,20 @@
      </item>
      <item row="2" column="1">
       <widget class="QCheckBox" name="_ignoreSslErrors">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Play sounds:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="_playSounds">
        <property name="text">
         <string/>
        </property>

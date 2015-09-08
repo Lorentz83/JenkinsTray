@@ -1,16 +1,15 @@
 #include "trayicon.h"
 
 #include <QMessageBox>
-#include <qdebug.h>
-#include <QMap>
+#include <QDebug>
 #include <QIcon>
 #include <QDesktopServices>
-
 #include <QDir>
 #include <QStyle>
 
-TrayIcon::TrayIcon(QWidget *parent) : QSystemTrayIcon(parent)
-{
+
+TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
+    QSystemTrayIcon(parent), _config(config) {
     _icons = QMap<JobStatus, QIcon>{
         {JobStatus::UNKNOWN, QIcon(":/ico/unknown")},
         {JobStatus::RUNNING, QIcon(":/ico/running")},
@@ -95,15 +94,12 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
 
 
-    if ( (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastGlobalStatus == JobStatus::FAILURE) {
+    if ( _config->playSounds() && (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastGlobalStatus == JobStatus::FAILURE) {
         _successSound.play();
-        qDebug() << "PLAY SUCCESS";
     }
-    if (globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE) {
+    if (_config->playSounds() && globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE) {
         _failSound.play();
-        qDebug() << "PLAY FAILURE";
     }
-    qDebug() << "current: " << globalStatus << " previous: "<< _lastGlobalStatus;
 
     _lastGlobalStatus = globalStatus;
     setIcon(_icons.value(globalStatus));

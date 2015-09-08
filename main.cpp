@@ -34,7 +34,7 @@ int main(int argc, char** argv){
     }
 
     ConfigurationWindow configuration(&sharedConfig);
-    TrayIcon tray(&configuration);
+    TrayIcon tray(&sharedConfig, &configuration);
     Backend backend(&sharedConfig);
     QTimer timer;
 

@@ -5,9 +5,11 @@
 #include <QMenu>
 #include <QSignalMapper>
 #include <QSoundEffect>
-#include "jenkinsjob.h"
 #include <QUrl>
 #include <QTemporaryDir>
+
+#include "jenkinsjob.h"
+#include "configuration.h"
 
 class TrayIcon : public QSystemTrayIcon
 {
@@ -18,6 +20,7 @@ class TrayIcon : public QSystemTrayIcon
     QSoundEffect _failSound, _successSound;
     QTemporaryDir *_soundDir;
     JobStatus _lastGlobalStatus;
+    Configuration *_config;
 
 protected slots:
     void openUrl(const QString& url);
@@ -31,7 +34,7 @@ signals:
     void configure();
 
 public:
-    TrayIcon(QWidget *parent = NULL);
+    TrayIcon(Configuration *config, QWidget *parent);
     ~TrayIcon();
 };
 

@@ -19,6 +19,8 @@ public:
     int refreshSec();
     void setIgnoreSslErrors(bool val);
     bool ignoreSslErrors();
+    void setPlaySounds(bool val);
+    bool playSounds();
 };
 
 
