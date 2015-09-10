@@ -8,9 +8,10 @@
 
 int main(int argc, char** argv){
     QApplication app(argc, argv);
-    QCoreApplication::setOrganizationName("Lorentz83");
-    QCoreApplication::setOrganizationDomain("https://github.com/Lorentz83");
-    QCoreApplication::setApplicationName("JenkinsTray");
+    app.setOrganizationName("Lorentz83");
+    app.setOrganizationDomain("https://github.com/Lorentz83");
+    app.setApplicationName("JenkinsTray");
+    app.setWindowIcon(QIcon(":/ico/appicon"));
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         QMessageBox::critical(0, QObject::tr("Systray"), QObject::tr("Cannot detect any system tray."));

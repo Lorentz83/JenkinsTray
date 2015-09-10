@@ -6,10 +6,10 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QStyle>
-
+#include <QApplication>
 
 TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
-    QSystemTrayIcon(parent), _config(config) {
+    QSystemTrayIcon(parent), _config(config), appIcon(parent->windowIcon()) {
     _icons = QMap<JobStatus, QIcon>{
         {JobStatus::UNKNOWN, QIcon(":/ico/unknown")},
         {JobStatus::RUNNING, QIcon(":/ico/running")},
@@ -34,8 +34,14 @@ TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
     menu->addSeparator();
     _buildsMenu = menu->addMenu("builds");
     setContextMenu(menu);
-
     connect(&_urlMapper, SIGNAL(mapped(QString)), this, SLOT(openUrl(QString)));
+
+    menu->addSeparator();
+    action = menu->addAction(parent->style()->standardIcon(QStyle::SP_DialogCloseButton), tr("&Quit"));
+    connect(action, &QAction::triggered, QApplication::instance(), &QApplication::quit);
+    action->setMenuRole(QAction::QuitRole);
+
+    connect(this, &TrayIcon::activated, [this](QSystemTrayIcon::ActivationReason reason){if (reason == QSystemTrayIcon::Trigger)openUrl(_config->url());});
 
     _soundDir = new QTemporaryDir();
     if (_soundDir->isValid()) {
@@ -44,11 +50,11 @@ TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
         QFile::copy(":/sounds/ok.wav", tmpDir.filePath("ok.wav"));
         _failSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ko.wav")));
         _successSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ok.wav")));
-        _failSound.setLoopCount(1); _failSound.setVolume(.25f);
-        _successSound.setLoopCount(1); _successSound.setVolume(.25f);
+        _failSound.setLoopCount(1); _failSound.setCategory("notifications");
+        _successSound.setLoopCount(1); _failSound.setCategory("notifications");
     }
 
-    _lastGlobalStatus = JobStatus::UNKNOWN;
+    _lastBrokenBuilds = -1;
 }
 
 TrayIcon::~TrayIcon(){
@@ -61,8 +67,7 @@ void TrayIcon::openUrl(const QString& url) {
 }
 
 void TrayIcon::about() {
-    QWidget *p = (QWidget *)parent();
-    QMessageBox box(p);
+    QMessageBox box;
     box.setTextFormat(Qt::RichText);
     box.setWindowTitle(tr("About JenkinsTray"));
     box.setText(tr("© 2015, Lorenzo Bossi\n"
@@ -72,7 +77,7 @@ void TrayIcon::about() {
                    "<a href='https://github.com/Lorentz83/JenkinsTray'>https://github.com/Lorentz83/JenkinsTray</a>"
                    "<br/><br/>"
                    "Icons by <a href='http://iconka.com'>http://iconka.com</a>"));
-    box.setIconPixmap(p->windowIcon().pixmap(128));
+    box.setIconPixmap(appIcon.pixmap(128));
     box.exec();
 }
 
@@ -82,25 +87,36 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
     _buildsMenu->clear();
 
     JobStatus globalStatus = JobStatus::UNKNOWN;
+    QStringList brokenBuilds;
 
     foreach(const JenkinsJob job, projects) {
         QAction *action = _buildsMenu->addAction(_icons.value(job.status), job.name + ": " + toQString(job.status));
         globalStatus = globalStatus && job.status;
         _urlMapper.setMapping(action, job.url);
         connect(action, SIGNAL(triggered(bool)), &_urlMapper, SLOT(map()));
-
+        if ( job.status == JobStatus::FAILURE )
+            brokenBuilds.append(job.name);
     }
 
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
 
-
-    if ( _config->playSounds() && (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastGlobalStatus == JobStatus::FAILURE) {
-        _successSound.play();
+    if (_lastBrokenBuilds >= 0) {
+        if ( (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastBrokenBuilds ) {
+            if ( _config->playSounds() )
+                _successSound.play();
+            showMessage(tr("All the projects are fixed!", "", projects.size()), message, QSystemTrayIcon::Information);
+        }
+        if ( globalStatus == JobStatus::FAILURE && ( brokenBuilds.size() < _lastBrokenBuilds ) ) {
+            showMessage(tr("%n projects were fixed", "", _lastBrokenBuilds - brokenBuilds.size()), message, QSystemTrayIcon::Warning);
+        }
+        if ( globalStatus == JobStatus::FAILURE && ( !_lastBrokenBuilds || brokenBuilds.size() > _lastBrokenBuilds ) ) {
+            if ( _config->playSounds() )
+                _failSound.play();
+            showMessage(tr("%n projects are broken!", "", brokenBuilds.size()),
+                        brokenBuilds.join("; "), QSystemTrayIcon::Critical);
+        }
     }
-    if (_config->playSounds() && globalStatus == JobStatus::FAILURE && _lastGlobalStatus != JobStatus::FAILURE) {
-        _failSound.play();
-    }
 
-    _lastGlobalStatus = globalStatus;
+    _lastBrokenBuilds = brokenBuilds.size();
     setIcon(_icons.value(globalStatus));
 }

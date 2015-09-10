@@ -19,10 +19,6 @@
   <property name="windowTitle">
    <string>JenkinsTray configuration</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="res.qrc">
-    <normaloff>:/ico/appicon</normaloff>:/ico/appicon</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QFormLayout" name="formLayout">
@@ -105,9 +101,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="res.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

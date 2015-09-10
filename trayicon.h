@@ -19,8 +19,9 @@ class TrayIcon : public QSystemTrayIcon
     QSignalMapper _urlMapper;
     QSoundEffect _failSound, _successSound;
     QTemporaryDir *_soundDir;
-    JobStatus _lastGlobalStatus;
+    int _lastBrokenBuilds;
     Configuration *_config;
+    QIcon appIcon;
 
 protected slots:
     void openUrl(const QString& url);
