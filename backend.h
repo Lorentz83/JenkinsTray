@@ -17,7 +17,7 @@ public:
     explicit Backend(Configuration *configuration, QObject *parent = 0);
 
 signals:
-    void statusUpdated(QVector<JenkinsJob>, QString);
+    void statusUpdated(QVector<JenkinsJob>, QString errorMessage);
 
 private slots:
     void sslError(QNetworkReply *reply, const QList<QSslError> &errors);

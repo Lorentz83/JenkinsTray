@@ -13,12 +13,12 @@ Simply run `JenkinsTray`. A new system tray will appear on your
 desktop. You can right click on it and configure the polling time and
 the Jenkins URL.
 
-You can either pass the required parameters on the command line
+You can specify on the command line the number of seconds to wait for
+a system tray. It is useful if you run JenkinsTray in an autostart
+script that executes before your desktop system tray is available.
 
 ```
-JenkinsTray [url] [polling time (sec)] [t|f]
+JenkinsTray [ -w [secs] ]
 ```
-
-where the last boolean parameter specifies if the ssl errors must be
-ignored (useful if you run Jenkins on https using a self signed
-certificate) 
+if you do not specify the seconds, or specify 0, the program will wait
+indefinitely.

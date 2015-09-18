@@ -5,7 +5,6 @@
 #include <QXmlResultItems>
 #include <QBuffer>
 #include <QRegExp>
-#include <QDateTime>
 
 Backend::Backend(Configuration *configuration, QObject *parent) :
     QObject(parent),
@@ -41,6 +40,14 @@ void Backend::netResponse(QNetworkReply* reply){
         emit statusUpdated(projectsStatus, reply->errorString());
         return;
     }
+    QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+    if ( !possibleRedirectUrl.isEmpty() && possibleRedirectUrl != reply->url() ) { //redirect
+        qDebug() << "Http request redirected to " << possibleRedirectUrl;
+        _netManager.get(QNetworkRequest(possibleRedirectUrl));
+        return;
+    }
+
+
 
     QByteArray encoded = reply->readAll();
     reply->deleteLater();
@@ -62,7 +69,7 @@ void Backend::netResponse(QNetworkReply* reply){
 
     QStringList projects;
     if ( !queryEntry.evaluateTo(&projects) ){
-        emit statusUpdated(projectsStatus, tr("ERROR: the response received does not look from Jenkins"));
+        emit statusUpdated(projectsStatus, tr("ERROR: the response received from %1 does not look from Jenkins").arg(reply->url().toString()));
         return;
     }
 
@@ -78,7 +85,7 @@ void Backend::netResponse(QNetworkReply* reply){
         }
     }
 
-    emit statusUpdated(projectsStatus, "Last update: " + QDateTime::currentDateTime().toString());
+    emit statusUpdated(projectsStatus, "");
 }
 
 void Backend::sslError(QNetworkReply *reply, const QList<QSslError> &) {

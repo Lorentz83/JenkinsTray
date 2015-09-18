@@ -81,10 +81,12 @@ void TrayIcon::about() {
     box.exec();
 }
 
-void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &message) {
-    setToolTip(message);
-
+void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &errorMessage) {
     _buildsMenu->clear();
+
+    if ( !errorMessage.isNull() && !errorMessage.isEmpty() ) {
+        showMessage(tr("JenkinsTray error"), errorMessage, QSystemTrayIcon::Critical);
+    }
 
     JobStatus globalStatus = JobStatus::UNKNOWN;
     QStringList brokenBuilds;
@@ -104,10 +106,10 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
         if ( (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastBrokenBuilds ) {
             if ( _config->playSounds() )
                 _successSound.play();
-            showMessage(tr("All the projects are fixed!", "", projects.size()), message, QSystemTrayIcon::Information);
+            showMessage(tr("All the projects are fixed!", "", projects.size()), "", QSystemTrayIcon::Information);
         }
         if ( globalStatus == JobStatus::FAILURE && ( brokenBuilds.size() < _lastBrokenBuilds ) ) {
-            showMessage(tr("%n projects were fixed", "", _lastBrokenBuilds - brokenBuilds.size()), message, QSystemTrayIcon::Warning);
+            showMessage(tr("%n projects were fixed", "", _lastBrokenBuilds - brokenBuilds.size()), "", QSystemTrayIcon::Warning);
         }
         if ( globalStatus == JobStatus::FAILURE && ( !_lastBrokenBuilds || brokenBuilds.size() > _lastBrokenBuilds ) ) {
             if ( _config->playSounds() )
@@ -119,4 +121,5 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
 
     _lastBrokenBuilds = brokenBuilds.size();
     setIcon(_icons.value(globalStatus));
+    setToolTip(tr("JenkinsTray: %n projects monitored", "", projects.size()));
 }

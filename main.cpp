@@ -5,6 +5,7 @@
 #include <QResource>
 #include <QMessageBox>
 #include <QTimer>
+#include <QThread>
 
 int main(int argc, char** argv){
     QApplication app(argc, argv);
@@ -12,6 +13,21 @@ int main(int argc, char** argv){
     app.setOrganizationDomain("https://github.com/Lorentz83");
     app.setApplicationName("JenkinsTray");
     app.setWindowIcon(QIcon(":/ico/appicon"));
+
+    int waitSystray = -1;
+    if ( argc > 1 && QStringLiteral("-w") == argv[1] ) {
+        waitSystray = 0;
+        if ( argc > 2 ) {
+            waitSystray = QString(argv[2]).toInt();
+        }
+    }
+
+    if (waitSystray >=0) {
+        for (int n = 0 ; !QSystemTrayIcon::isSystemTrayAvailable() && ( waitSystray == 0 || n < waitSystray) ; n++) {
+            qWarning() << "waiting for system tray";
+            QThread::sleep(1);
+        }
+    }
 
     if (!QSystemTrayIcon::isSystemTrayAvailable()) {
         QMessageBox::critical(0, QObject::tr("Systray"), QObject::tr("Cannot detect any system tray."));
@@ -21,18 +37,6 @@ int main(int argc, char** argv){
     QApplication::setQuitOnLastWindowClosed(false);
 
     Configuration sharedConfig;
-    bool showConfiguration = sharedConfig.firstRun();
-    if ( argc > 1 ) {
-        showConfiguration = false;
-        sharedConfig.setUrl(argv[1]);
-        if (argc > 2) {
-            sharedConfig.setRefreshSec(QString(argv[2]).toInt());
-        }
-        if (argc > 3) {
-            QString ignore(argv[3]);
-            sharedConfig.setIgnoreSslErrors(ignore.compare("t", Qt::CaseInsensitive) == 0 || ignore.compare("true", Qt::CaseInsensitive) == 0);
-        }
-    }
 
     ConfigurationWindow configuration(&sharedConfig);
     TrayIcon tray(&sharedConfig, &configuration);
@@ -40,7 +44,7 @@ int main(int argc, char** argv){
     QTimer timer;
 
     tray.show();
-    if ( showConfiguration )
+    if ( sharedConfig.firstRun() )
         configuration.show();
 
     backend.refresh();
