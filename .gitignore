@@ -1,1 +1,3 @@
-JenkinsTray.pro.user
+*.pro.user
+/*/Makefile
+/build
