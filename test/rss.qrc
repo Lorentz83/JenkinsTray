@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/oneproject_multiplebuilds.rss</file>
+        <file>res/empty.rss</file>
+        <file>res/junk.rss</file>
+    </qresource>
+</RCC>

@@ -81,23 +81,24 @@ void TrayIcon::about() {
     box.exec();
 }
 
-void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &errorMessage) {
+void TrayIcon::updateStatus(const JenkinsStatus& status) {
     _buildsMenu->clear();
 
-    if ( !errorMessage.isNull() && !errorMessage.isEmpty() ) {
-        showMessage(tr("JenkinsTray error"), errorMessage, QSystemTrayIcon::Critical);
+    if ( !status.isValid() ) {
+        showMessage(tr("JenkinsTray error"), status.errorMessage(), QSystemTrayIcon::Critical);
+        return;
     }
 
-    JobStatus globalStatus = JobStatus::UNKNOWN;
     QStringList brokenBuilds;
+    JobStatus globalStatus = JobStatus::UNKNOWN;
 
-    foreach(const JenkinsJob job, projects) {
-        QAction *action = _buildsMenu->addAction(_icons.value(job.status), job.name + ": " + toQString(job.status));
-        globalStatus = globalStatus && job.status;
-        _urlMapper.setMapping(action, job.url);
+    foreach( const JenkinsJob job, status.jobs() ) {
+        QAction *action = _buildsMenu->addAction(_icons.value(job.status()), job.name() + ": " + toQString(job.status()));
+        globalStatus = globalStatus && job.status();
+        _urlMapper.setMapping(action, job.url());
         connect(action, SIGNAL(triggered(bool)), &_urlMapper, SLOT(map()));
-        if ( job.status == JobStatus::FAILURE )
-            brokenBuilds.append(job.name);
+        if ( job.status() == JobStatus::FAILURE )
+            brokenBuilds.append(job.name());
     }
 
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
@@ -106,7 +107,7 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
         if ( (globalStatus == JobStatus::SUCCESS || globalStatus == JobStatus::INSTABLE) && _lastBrokenBuilds ) {
             if ( _config->playSounds() )
                 _successSound.play();
-            showMessage(tr("All the projects are fixed!", "", projects.size()), "", QSystemTrayIcon::Information);
+            showMessage(tr("All the projects are fixed!", "", status.jobs().size()), "", QSystemTrayIcon::Information);
         }
         if ( globalStatus == JobStatus::FAILURE && ( brokenBuilds.size() < _lastBrokenBuilds ) ) {
             showMessage(tr("%n projects were fixed", "", _lastBrokenBuilds - brokenBuilds.size()), "", QSystemTrayIcon::Warning);
@@ -121,5 +122,5 @@ void TrayIcon::updateStatus(const QVector<JenkinsJob> &projects, const QString &
 
     _lastBrokenBuilds = brokenBuilds.size();
     setIcon(_icons.value(globalStatus));
-    setToolTip(tr("JenkinsTray: %n projects monitored", "", projects.size()));
+    setToolTip(tr("JenkinsTray: %n projects monitored", "", status.jobs().size()));
 }

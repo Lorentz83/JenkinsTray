@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>All all builds</title>
+  <link type="text/html" href="http://localhost/jenkins/" rel="alternate"/>
+  <updated>2015-12-08T18:53:02Z</updated>
+  <author>
+    <name>Jenkins Server</name>
+  </author>
+  <id>urn:uuid:903deee0-7bfa-11db-9fe1-0800200c9a66</id>
+  <entry>
+    <title>proj 1 #7 (back to normal)</title>
+    <link type="text/html" href="http://localhost/jenkins/job/proj%201/7/" rel="alternate"/>
+    <id>tag:hudson.dev.java.net,2015:proj 1:2015-12-08_13-53-02</id>
+    <published>2015-12-08T18:53:02Z</published>
+    <updated>2015-12-08T18:53:02Z</updated>
+  </entry>
+  <entry>
+    <title>proj 1 #2 (broken for a long time)</title>
+    <link type="text/html" href="http://localhost/jenkins/job/proj%201/2/" rel="alternate"/>
+    <id>tag:hudson.dev.java.net,2015:proj 1:2015-12-08_13-52-32</id>
+    <published>2015-12-08T18:52:32Z</published>
+    <updated>2015-12-08T18:52:32Z</updated>
+  </entry>
+  <entry>
+    <title>proj 1 #1 (broken since this build)</title>
+    <link type="text/html" href="http://localhost/jenkins/job/proj%201/1/" rel="alternate"/>
+    <id>tag:hudson.dev.java.net,2015:proj 1:2015-12-08_13-51-46</id>
+    <published>2015-12-08T18:51:46Z</published>
+    <updated>2015-12-08T18:51:46Z</updated>
+  </entry>
+</feed>

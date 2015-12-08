@@ -6,6 +6,7 @@
 
 #include <QNetworkAccessManager>
 #include <QVector>
+#include <QIODevice>
 
 class Backend : public QObject
 {
@@ -17,7 +18,7 @@ public:
     explicit Backend(Configuration *configuration, QObject *parent = 0);
 
 signals:
-    void statusUpdated(QVector<JenkinsJob>, QString errorMessage);
+    void statusUpdated(JenkinsStatus);
 
 private slots:
     void sslError(QNetworkReply *reply, const QList<QSslError> &errors);
@@ -26,5 +27,8 @@ private slots:
 public slots:
     void refresh();
 };
+
+JenkinsStatus parseJenkinsRss(QIODevice &rss);
+
 
 #endif // BACKEND_H

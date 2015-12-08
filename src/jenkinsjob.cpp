@@ -3,7 +3,7 @@
 #include <QDebug>
 
 JobStatus operator&& (JobStatus j1, JobStatus j2) {
-    return j1 > j2 ? j1:j2;
+   return j1 > j2 ? j1:j2;
 }
 
 JobStatus parseJobStatus(const QString &str) {
@@ -19,7 +19,7 @@ JobStatus parseJobStatus(const QString &str) {
     return JobStatus::UNKNOWN;
 }
 
-QString  toQString(const JobStatus &status){
+QString toQString(const JobStatus &status){
     switch(status) {
     case JobStatus::SUCCESS:
         return "Success";
@@ -41,7 +41,7 @@ QDebug operator<<(QDebug dbg, const JobStatus &status){
 
 
 QDebug operator<<(QDebug dbg, const JenkinsJob &job){
-    dbg.nospace() << job.name << " #" << job.buildNumber << " " << job.status << " " << job.url;
+    dbg.nospace() << job.name() << " #" << job.buildNumber() << " " << job.status() << " " << job.url();
 
     return dbg.maybeSpace();
 }

@@ -5,6 +5,7 @@
 #include <QXmlResultItems>
 #include <QBuffer>
 #include <QRegExp>
+#include <QMap>
 
 Backend::Backend(Configuration *configuration, QObject *parent) :
     QObject(parent),
@@ -34,10 +35,8 @@ void Backend::refresh() {
 }
 
 void Backend::netResponse(QNetworkReply* reply){
-    QVector<JenkinsJob> projectsStatus;
-
     if (reply->error() != QNetworkReply::NoError) {
-        emit statusUpdated(projectsStatus, reply->errorString());
+        emit statusUpdated(JenkinsStatus(reply->errorString()));
         return;
     }
     QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -47,18 +46,25 @@ void Backend::netResponse(QNetworkReply* reply){
         return;
     }
 
-
-
     QByteArray encoded = reply->readAll();
     reply->deleteLater();
-
-    //QString resp = QTextCodec::codecForHtml(encoded,QTextCodec::codecForName("UTF-8"))->toUnicode(encoded);
 
     QBuffer buffer(&encoded); // This is a QIODevice.
     buffer.open(QIODevice::ReadOnly);
 
+    emit statusUpdated(parseJenkinsRss(buffer));
+}
+
+void Backend::sslError(QNetworkReply *reply, const QList<QSslError> &) {
+    if (_configuration->ignoreSslErrors())
+        reply->ignoreSslErrors();
+}
+
+
+
+JenkinsStatus parseJenkinsRss(QIODevice &rss) {
     QXmlQuery queryEntry;
-    queryEntry.bindVariable("rss", &buffer);
+    queryEntry.bindVariable("rss", &rss);
     queryEntry.setQuery("declare default element namespace \"http://www.w3.org/2005/Atom\"; "
                    "declare variable $rss external; "
                    "for $entry in doc($rss)/feed/entry "
@@ -68,11 +74,12 @@ void Backend::netResponse(QNetworkReply* reply){
     QRegExp rx("^(.+) #([0-9]+) \\((.*)\\) (http.*)$");
 
     QStringList projects;
-    if ( !queryEntry.evaluateTo(&projects) ){
-        emit statusUpdated(projectsStatus, tr("ERROR: the response received from %1 does not look from Jenkins").arg(reply->url().toString()));
-        return;
+    if ( !queryEntry.evaluateTo(&projects) ) {
+        QString error = QObject::tr("Not a jenkins reply");
+        return JenkinsStatus(error);
     }
 
+    QMap<QString, JenkinsJob> jobs;
     foreach (QString str, projects) {
         if (rx.indexIn(str) == -1) {
             qDebug() << "error parsing " << str;
@@ -81,14 +88,12 @@ void Backend::netResponse(QNetworkReply* reply){
             int buildNumber = rx.cap(2).toInt();
             JobStatus status = parseJobStatus(rx.cap(3));
             QString url = rx.cap(4);
-            projectsStatus.append(JenkinsJob(name, buildNumber, status, url));
+
+            JenkinsJob old = jobs.value(name);
+            if ( !old.isValid() || old.buildNumber() < buildNumber ) {
+                jobs.insert(name, JenkinsJob(name,buildNumber,status, url));
+            }
         }
     }
-
-    emit statusUpdated(projectsStatus, "");
-}
-
-void Backend::sslError(QNetworkReply *reply, const QList<QSslError> &) {
-    if (_configuration->ignoreSslErrors())
-        reply->ignoreSslErrors();
+    return JenkinsStatus(jobs.values());
 }

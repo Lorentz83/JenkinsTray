@@ -28,7 +28,7 @@ protected slots:
 
 public slots:
     void about();
-    void updateStatus(const QVector<JenkinsJob>&, const QString&);
+    void updateStatus(const JenkinsStatus&);
 
 signals:
     void refresh();

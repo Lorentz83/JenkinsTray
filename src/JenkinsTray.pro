@@ -4,13 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network xml xmlpatterns multimedia
+QT       += core gui widgets network xml xmlpatterns multimedia
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QMAKE_CXXFLAGS += -std=c++11
 
 TARGET = JenkinsTray
 TEMPLATE = app
-QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
     trayicon.cpp \
