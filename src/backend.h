@@ -25,6 +25,16 @@ private slots:
     void netResponse(QNetworkReply* reply);
 
 public slots:
+    /**
+     * Loads the status from jenkins.
+     * This method queries /rssAll
+     */
+    void loadStatus();
+
+    /**
+     * Refreshes the status of jenkins.
+     * This method queries /rssLatest
+     */
     void refresh();
 };
 

@@ -21,16 +21,21 @@ Backend::Backend(Configuration *configuration, QObject *parent) :
 
 }
 
+void Backend::loadStatus() {
+    QUrl url;
+    if ( _configuration->url().endsWith('/') )
+        url = QUrl(_configuration->url() + "rssAll" );
+    else
+        url = QUrl(_configuration->url() + "/rssAll" );
+    _netManager.get(QNetworkRequest(url));
+}
+
 void Backend::refresh() {
     QUrl url;
-    if (_configuration->url().endsWith("/rssLatest")) {
-        url = QUrl(_configuration->url());
-    } else {
-        if ( _configuration->url().endsWith('/') )
-            url = QUrl(_configuration->url() + "rssLatest" );
-        else
-            url = QUrl(_configuration->url() + "/rssLatest" );
-    }
+    if ( _configuration->url().endsWith('/') )
+        url = QUrl(_configuration->url() + "rssLatest" );
+    else
+        url = QUrl(_configuration->url() + "/rssLatest" );
     _netManager.get(QNetworkRequest(url));
 }
 

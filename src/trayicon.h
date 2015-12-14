@@ -6,6 +6,7 @@
 #include <QSignalMapper>
 #include <QSoundEffect>
 #include <QUrl>
+#include <QMap>
 #include <QTemporaryDir>
 
 #include "jenkinsjob.h"
@@ -19,9 +20,9 @@ class TrayIcon : public QSystemTrayIcon
     QSignalMapper _urlMapper;
     QSoundEffect _failSound, _successSound;
     QTemporaryDir *_soundDir;
-    int _lastBrokenBuilds;
     Configuration *_config;
     QIcon appIcon;
+    QMap<QString, JobStatus> _oldStatus;
 
 protected slots:
     void openUrl(const QString& url);
