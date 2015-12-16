@@ -15,14 +15,17 @@
 class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
-    QMenu *_buildsMenu;
-    QMap<JobStatus, QIcon> _icons;
+
     QSignalMapper _urlMapper;
     QSoundEffect _failSound, _successSound;
     QTemporaryDir *_soundDir;
     Configuration *_config;
-    QIcon appIcon;
+    QIcon _appIcon;
+    QMenu *_buildsMenu;
+    QMap<JobStatus, QIcon> _icons;
     QMap<QString, JobStatus> _oldStatus;
+    bool _lastUpdateWasError;
+    QString _lastErrorMessage;
 
 protected slots:
     void openUrl(const QString& url);

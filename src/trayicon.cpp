@@ -9,7 +9,7 @@
 #include <QApplication>
 
 TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
-    QSystemTrayIcon(parent), _config(config), appIcon(parent->windowIcon()) {
+    QSystemTrayIcon(parent), _config(config), _appIcon(parent->windowIcon()) {
     _icons = QMap<JobStatus, QIcon>{
         {JobStatus::UNKNOWN, QIcon(":/ico/unknown")},
         {JobStatus::RUNNING, QIcon(":/ico/running")},
@@ -17,8 +17,9 @@ TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
         {JobStatus::SUCCESS, QIcon(":/ico/success")},
         {JobStatus::FAILURE, QIcon(":/ico/failure")},
     };
+    setIcon(_appIcon);
+    _lastUpdateWasError = false;
 
-    setIcon(QIcon(":/ico/fog"));
     QMenu *menu = new QMenu(parent);
     QAction *action;
 
@@ -75,7 +76,7 @@ void TrayIcon::about() {
                    "<a href='https://github.com/Lorentz83/JenkinsTray'>https://github.com/Lorentz83/JenkinsTray</a>"
                    "<br/><br/>"
                    "Icons by <a href='http://iconka.com'>http://iconka.com</a>"));
-    box.setIconPixmap(appIcon.pixmap(128));
+    box.setIconPixmap(_appIcon.pixmap(128));
     box.exec();
 }
 
@@ -91,8 +92,20 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
     _buildsMenu->clear();
 
     if ( !status.isValid() ) {
-        showMessage(tr("JenkinsTray error"), status.errorMessage(), QSystemTrayIcon::Critical);
+        // if there is a new error message
+        // or there is an error without a message
+        //   show a notification
+        if ( _lastErrorMessage != status.errorMessage() || _lastUpdateWasError == false ) {
+            showMessage(tr("JenkinsTray error"), status.errorMessage(), QSystemTrayIcon::Critical);
+            setToolTip(tr("JenkinsTray error: %1").arg(status.errorMessage()));
+            setIcon(_appIcon);
+            _lastErrorMessage = status.errorMessage();
+        }
+        _lastUpdateWasError = true;
         return;
+    } else {
+        _lastErrorMessage = "";
+        _lastUpdateWasError = false;
     }
 
     QStringList brokenBuilds;
