@@ -1,8 +1,13 @@
-all:
+all: test
+
+
+JenkinsTray:
 	cd src && qmake && make
-	cd test && qmake && make
-	build/test/test
 	echo build/*/JenkinsTray
 
-install:
+test: JenkinsTray
+	cd test && qmake && make
+	build/test/test
+
+install: JenkinsTray
 	cp build/*/JenkinsTray ~/bin/JenkinsTray
