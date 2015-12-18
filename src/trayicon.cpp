@@ -110,8 +110,10 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
 
     QStringList brokenBuilds;
     int newBroken = 0, newFixed = 0, probablyStillBroken = 0;
+    int running = 0, successful = 0;
     JobStatus globalStatus = JobStatus::UNKNOWN;
 
+    QSet<QString> activeJobs;
     foreach ( const JenkinsJob& job, status.jobs() ) {
         QAction *action = _buildsMenu->addAction(_icons.value(job.status()), job.name() + ": " + toQString(job.status()));
         globalStatus = globalStatus && job.status();
@@ -127,16 +129,26 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
             case JobStatus::INSTABLE:
                 if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
                     newFixed++;
+                successful++;
                 break;
             case JobStatus::RUNNING:
                 if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
                     probablyStillBroken++;
+                running++;
                 break;
             default:
                 break;
         }
         if (job.status() == JobStatus::FAILURE || job.status() == JobStatus::INSTABLE|| job.status() == JobStatus::SUCCESS)
             _oldStatus.insert(job.name(), job.status());
+        activeJobs.insert(job.name());
+    }
+    // a project can be deleted, this is to remove its status.
+    for (auto old = _oldStatus.begin() ; old != _oldStatus.end() ;) {
+        if (!activeJobs.contains(old.key()))
+            old = _oldStatus.erase(old);
+        else
+            old++;
     }
 
     _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
@@ -149,13 +161,30 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
         if ( newBroken > 0 ) {
             if ( _config->playSounds() )
                 _failSound.play();
-            QString msg = tr("%n new projects are broken", "", newBroken);
+            QString msg = tr("%n newly broken project(s)", "", newBroken);
             if ( newFixed > 0 )
-                showMessage(msg + tr(" and %n new projects are fixed", "", newFixed), "", QSystemTrayIcon::Critical);
-            else
-                showMessage(tr("%n projects are broken!", "", brokenBuilds.size()), brokenBuilds.join("; "), QSystemTrayIcon::Critical);
+                msg += tr(" and %n newly fixed project(s)", "", newFixed);
+            showMessage(msg, tr("Broken project(s):\n%1", "", brokenBuilds.size()).arg(brokenBuilds.join(";\n")), QSystemTrayIcon::Critical);
         }
     }
-    setIcon(_icons.value(globalStatus));
-    setToolTip(tr("JenkinsTray: %n projects monitored", "", status.jobs().size()));
+
+    QStringList tooltip;
+    tooltip.append("JenkinsTray:");
+    if (brokenBuilds.size() > 0) {
+        tooltip.append(tr("%n project(s) broken;", "", brokenBuilds.size()));
+    }
+    if (running > 0) {
+        tooltip.append(tr("%n project(s) running;", "", running));
+    }
+    if (successful > 0) {
+        tooltip.append(tr("%n project(s) successfully built;", "", successful));
+    }
+    if (tooltip.size() == 1) {
+        tooltip.append("no project monitored.");
+        setIcon(_appIcon);
+    }
+    else {
+        setIcon(_icons.value(globalStatus));
+    }
+    setToolTip(tooltip.join("\n"));
 }
