@@ -89,6 +89,8 @@ JobStatus getStatus(const JenkinsStatus& status, const QString& jobName) {
 }
 
 void TrayIcon::updateStatus(const JenkinsStatus& status) {
+    static bool firstRun = true;
+
     _buildsMenu->clear();
 
     if ( !status.isValid() ) {
@@ -109,6 +111,7 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
     }
 
     QStringList brokenBuilds;
+    QStringList newBuilds;
     int newBroken = 0, newFixed = 0, probablyStillBroken = 0;
     int running = 0, successful = 0;
     JobStatus globalStatus = JobStatus::UNKNOWN;
@@ -127,6 +130,8 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
                 break;
             case JobStatus::SUCCESS:
             case JobStatus::INSTABLE:
+                if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::UNKNOWN)
+                    newBuilds.append(job.name());
                 if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
                     newFixed++;
                 successful++;
@@ -167,6 +172,11 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
             showMessage(msg, tr("Broken project(s):\n%1", "", brokenBuilds.size()).arg(brokenBuilds.join(";\n")), QSystemTrayIcon::Critical);
         }
     }
+
+    if ( !newBuilds.empty() && !firstRun) {
+        showMessage(tr("New project(s)"), newBuilds.join(";\n"), QSystemTrayIcon::Information);
+    }
+    firstRun = false;
 
     QStringList tooltip;
     tooltip.append("JenkinsTray:");
