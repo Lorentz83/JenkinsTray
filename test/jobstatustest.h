@@ -9,11 +9,11 @@ class jobStatusTest : public QObject
 {
     Q_OBJECT
 
-    std::array<JobStatus, 5> status;
+    std::array<JobStatus, 5> status_;
 
 public:
     jobStatusTest() {
-        status = {JobStatus::UNKNOWN, JobStatus::RUNNING, JobStatus::INSTABLE, JobStatus::SUCCESS, JobStatus::FAILURE};
+        status_ = {JobStatus::UNKNOWN, JobStatus::RUNNING, JobStatus::INSTABLE, JobStatus::SUCCESS, JobStatus::FAILURE};
     }
 
 private slots:

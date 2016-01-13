@@ -10,47 +10,47 @@ QString  toQString(const JobStatus &);
 JobStatus operator&& (JobStatus j1, JobStatus j2);
 
 class JenkinsJob {
-    bool _valid;
-    QString _name;
-    int _buildNumber;
-    JobStatus _status;
-    QString _url;
+    bool valid_;
+    QString name_;
+    int buildNumber_;
+    JobStatus status_;
+    QString url_;
 
 public:
     JenkinsJob() :
-        _valid(false), _buildNumber(-1), _status(JobStatus::UNKNOWN) {
+        valid_(false), buildNumber_(-1), status_(JobStatus::UNKNOWN) {
     }
     JenkinsJob(QString name, int buildNumber, JobStatus status, QString url) :
-        _valid(true), _name(name), _buildNumber(buildNumber), _status(status), _url(url) {
+        valid_(true), name_(name), buildNumber_(buildNumber), status_(status), url_(url) {
     }
 
-    int buildNumber() const { return _buildNumber; }
-    JobStatus status() const {return _status; }
-    QString url() const { return _url; }
-    QString name() const { return _name; }
-    bool isValid() const { return _valid; }
+    int buildNumber() const { return buildNumber_; }
+    JobStatus status() const {return status_; }
+    QString url() const { return url_; }
+    QString name() const { return name_; }
+    bool isValid() const { return valid_; }
 };
 
 
 class JenkinsStatus {
-    bool _valid;
-    QList<JenkinsJob> _jobs;
-    QString _error;
+    bool valid_;
+    QList<JenkinsJob> jobs_;
+    QString error_;
 
 public:
-    JenkinsStatus(const QString& error):   _valid(false), _error(error) { }
-    JenkinsStatus(QList<JenkinsJob> jobs): _valid(true),  _jobs(jobs) { }
+    JenkinsStatus(const QString& error):   valid_(false), error_(error) { }
+    JenkinsStatus(QList<JenkinsJob> jobs): valid_(true),  jobs_(jobs) { }
 
     bool isValid() const {
-        return _valid;
+        return valid_;
     }
 
     const QList<JenkinsJob>& jobs() const {
-        return _jobs;
+        return jobs_;
     }
 
     const QString& errorMessage() const {
-        return _error;
+        return error_;
     }
 };
 

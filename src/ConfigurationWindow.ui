@@ -23,28 +23,28 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="urlLabel_">
        <property name="text">
         <string>Jenkins URL:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="_url">
+      <widget class="QLineEdit" name="url_">
        <property name="placeholderText">
         <string>http://</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="refreshLabel_">
        <property name="text">
         <string>Refresh time (seconds):</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSpinBox" name="_refresh">
+      <widget class="QSpinBox" name="refresh_">
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
@@ -60,28 +60,28 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="ignoreSslErrorsLabel_">
        <property name="text">
         <string>Ignore ssl errors:</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QCheckBox" name="_ignoreSslErrors">
+      <widget class="QCheckBox" name="ignoreSslErrors_">
        <property name="text">
         <string/>
        </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="playSoundsLabel_">
        <property name="text">
         <string>Play sounds:</string>
        </property>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QCheckBox" name="_playSounds">
+      <widget class="QCheckBox" name="playSounds_">
        <property name="text">
         <string/>
        </property>

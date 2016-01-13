@@ -9,16 +9,16 @@
 #include <QApplication>
 
 TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
-    QSystemTrayIcon(parent), _config(config), _appIcon(parent->windowIcon()) {
-    _icons = QMap<JobStatus, QIcon>{
+    QSystemTrayIcon(parent), config_(config), appIcon_(parent->windowIcon()) {
+    icons_ = QMap<JobStatus, QIcon>{
         {JobStatus::UNKNOWN, QIcon(":/ico/unknown")},
         {JobStatus::RUNNING, QIcon(":/ico/running")},
         {JobStatus::INSTABLE, QIcon(":/ico/instable")},
         {JobStatus::SUCCESS, QIcon(":/ico/success")},
         {JobStatus::FAILURE, QIcon(":/ico/failure")},
     };
-    setIcon(_appIcon);
-    _lastUpdateWasError = false;
+    setIcon(appIcon_);
+    lastUpdateWasError_ = false;
 
     QMenu *menu = new QMenu(parent);
     QAction *action;
@@ -33,31 +33,31 @@ TrayIcon::TrayIcon(Configuration *config, QWidget *parent) :
     connect(action, &QAction::triggered, this, &TrayIcon::about);
 
     menu->addSeparator();
-    _buildsMenu = menu->addMenu("builds");
+    buildsMenu_ = menu->addMenu("builds");
     setContextMenu(menu);
-    connect(&_urlMapper, SIGNAL(mapped(QString)), this, SLOT(openUrl(QString)));
+    connect(&urlMapper_, SIGNAL(mapped(QString)), this, SLOT(openUrl(QString)));
 
     menu->addSeparator();
     action = menu->addAction(parent->style()->standardIcon(QStyle::SP_DialogCloseButton), tr("&Quit"));
     connect(action, &QAction::triggered, QApplication::instance(), &QApplication::quit);
     action->setMenuRole(QAction::QuitRole);
 
-    connect(this, &TrayIcon::activated, [this](QSystemTrayIcon::ActivationReason reason){if (reason == QSystemTrayIcon::Trigger)openUrl(_config->url());});
+    connect(this, &TrayIcon::activated, [this](QSystemTrayIcon::ActivationReason reason){if (reason == QSystemTrayIcon::Trigger)openUrl(config_->url());});
 
-    _soundDir = new QTemporaryDir();
-    if (_soundDir->isValid()) {
-        QDir tmpDir(_soundDir->path());
+    soundDir_ = new QTemporaryDir();
+    if (soundDir_->isValid()) {
+        QDir tmpDir(soundDir_->path());
         QFile::copy(":/sounds/ko.wav", tmpDir.filePath("ko.wav"));
         QFile::copy(":/sounds/ok.wav", tmpDir.filePath("ok.wav"));
         _failSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ko.wav")));
-        _successSound.setSource(QUrl::fromLocalFile(tmpDir.filePath("ok.wav")));
+        successSound_.setSource(QUrl::fromLocalFile(tmpDir.filePath("ok.wav")));
         _failSound.setLoopCount(1); _failSound.setCategory("notifications");
-        _successSound.setLoopCount(1); _failSound.setCategory("notifications");
+        successSound_.setLoopCount(1); _failSound.setCategory("notifications");
     }
 }
 
 TrayIcon::~TrayIcon(){
-    delete _soundDir;
+    delete soundDir_;
 }
 
 void TrayIcon::openUrl(const QString& url) {
@@ -76,7 +76,7 @@ void TrayIcon::about() {
                    "<a href='https://github.com/Lorentz83/JenkinsTray'>https://github.com/Lorentz83/JenkinsTray</a>"
                    "<br/><br/>"
                    "Icons by <a href='http://iconka.com'>http://iconka.com</a>"));
-    box.setIconPixmap(_appIcon.pixmap(128));
+    box.setIconPixmap(appIcon_.pixmap(128));
     box.exec();
 }
 
@@ -91,23 +91,23 @@ JobStatus getStatus(const JenkinsStatus& status, const QString& jobName) {
 void TrayIcon::updateStatus(const JenkinsStatus& status) {
     static bool firstRun = true;
 
-    _buildsMenu->clear();
+    buildsMenu_->clear();
 
     if ( !status.isValid() ) {
         // if there is a new error message
         // or there is an error without a message
         //   show a notification
-        if ( _lastErrorMessage != status.errorMessage() || _lastUpdateWasError == false ) {
+        if ( lastErrorMessage_ != status.errorMessage() || lastUpdateWasError_ == false ) {
             showMessage(tr("JenkinsTray error"), status.errorMessage(), QSystemTrayIcon::Critical);
             setToolTip(tr("JenkinsTray error: %1").arg(status.errorMessage()));
-            setIcon(_appIcon);
-            _lastErrorMessage = status.errorMessage();
+            setIcon(appIcon_);
+            lastErrorMessage_ = status.errorMessage();
         }
-        _lastUpdateWasError = true;
+        lastUpdateWasError_ = true;
         return;
     } else {
-        _lastErrorMessage = "";
-        _lastUpdateWasError = false;
+        lastErrorMessage_ = "";
+        lastUpdateWasError_ = false;
     }
 
     QStringList brokenBuilds;
@@ -118,26 +118,26 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
 
     QSet<QString> activeJobs;
     foreach ( const JenkinsJob& job, status.jobs() ) {
-        QAction *action = _buildsMenu->addAction(_icons.value(job.status()), job.name() + ": " + toQString(job.status()));
+        QAction *action = buildsMenu_->addAction(icons_.value(job.status()), job.name() + ": " + toQString(job.status()));
         globalStatus = globalStatus && job.status();
-        _urlMapper.setMapping(action, job.url());
-        connect(action, SIGNAL(triggered(bool)), &_urlMapper, SLOT(map()));
+        urlMapper_.setMapping(action, job.url());
+        connect(action, SIGNAL(triggered(bool)), &urlMapper_, SLOT(map()));
         switch( job.status() ) {
             case JobStatus::FAILURE:
-                if ( _oldStatus.value(job.name(), JobStatus::UNKNOWN) != JobStatus::FAILURE)
+                if ( oldStatus_.value(job.name(), JobStatus::UNKNOWN) != JobStatus::FAILURE)
                     newBroken++;
                 brokenBuilds.append(job.name());
                 break;
             case JobStatus::SUCCESS:
             case JobStatus::INSTABLE:
-                if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::UNKNOWN)
+                if (oldStatus_.value(job.name(), JobStatus::UNKNOWN) == JobStatus::UNKNOWN)
                     newBuilds.append(job.name());
-                if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
+                if (oldStatus_.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
                     newFixed++;
                 successful++;
                 break;
             case JobStatus::RUNNING:
-                if (_oldStatus.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
+                if (oldStatus_.value(job.name(), JobStatus::UNKNOWN) == JobStatus::FAILURE)
                     probablyStillBroken++;
                 running++;
                 break;
@@ -145,26 +145,26 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
                 break;
         }
         if (job.status() == JobStatus::FAILURE || job.status() == JobStatus::INSTABLE|| job.status() == JobStatus::SUCCESS)
-            _oldStatus.insert(job.name(), job.status());
+            oldStatus_.insert(job.name(), job.status());
         activeJobs.insert(job.name());
     }
     // a project can be deleted, this is to remove its status.
-    for (auto old = _oldStatus.begin() ; old != _oldStatus.end() ;) {
+    for (auto old = oldStatus_.begin() ; old != oldStatus_.end() ;) {
         if (!activeJobs.contains(old.key()))
-            old = _oldStatus.erase(old);
+            old = oldStatus_.erase(old);
         else
             old++;
     }
 
-    _buildsMenu->setEnabled(!_buildsMenu->isEmpty());
+    buildsMenu_->setEnabled(!buildsMenu_->isEmpty());
 
     if (newFixed > 0 && brokenBuilds.size() == 0 && probablyStillBroken == 0) {
-        if ( _config->playSounds() )
-            _successSound.play();
+        if ( config_->playSounds() )
+            successSound_.play();
         showMessage(tr("All the projects are fixed!", "", status.jobs().size()), "", QSystemTrayIcon::Information);
     } else {
         if ( newBroken > 0 ) {
-            if ( _config->playSounds() )
+            if ( config_->playSounds() )
                 _failSound.play();
             QString msg = tr("%n newly broken project(s)", "", newBroken);
             if ( newFixed > 0 )
@@ -191,10 +191,10 @@ void TrayIcon::updateStatus(const JenkinsStatus& status) {
     }
     if (tooltip.size() == 1) {
         tooltip.append("no project monitored.");
-        setIcon(_appIcon);
+        setIcon(appIcon_);
     }
     else {
-        setIcon(_icons.value(globalStatus));
+        setIcon(icons_.value(globalStatus));
     }
     setToolTip(tooltip.join("\n"));
 }

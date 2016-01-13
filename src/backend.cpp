@@ -9,34 +9,34 @@
 
 Backend::Backend(Configuration *configuration, QObject *parent) :
     QObject(parent),
-    _configuration(configuration),
-    _netManager(parent)
+    configuration_(configuration),
+    netManager_(parent)
 {
 
-    connect(&_netManager, SIGNAL(finished(QNetworkReply*)),
+    connect(&netManager_, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(netResponse(QNetworkReply*)));
 
-    connect(&_netManager, &QNetworkAccessManager::sslErrors,
+    connect(&netManager_, &QNetworkAccessManager::sslErrors,
             this, &Backend::sslError);
 
 }
 
 void Backend::loadStatus() {
     QUrl url;
-    if ( _configuration->url().endsWith('/') )
-        url = QUrl(_configuration->url() + "rssAll" );
+    if ( configuration_->url().endsWith('/') )
+        url = QUrl(configuration_->url() + "rssAll" );
     else
-        url = QUrl(_configuration->url() + "/rssAll" );
-    _netManager.get(QNetworkRequest(url));
+        url = QUrl(configuration_->url() + "/rssAll" );
+    netManager_.get(QNetworkRequest(url));
 }
 
 void Backend::refresh() {
     QUrl url;
-    if ( _configuration->url().endsWith('/') )
-        url = QUrl(_configuration->url() + "rssLatest" );
+    if ( configuration_->url().endsWith('/') )
+        url = QUrl(configuration_->url() + "rssLatest" );
     else
-        url = QUrl(_configuration->url() + "/rssLatest" );
-    _netManager.get(QNetworkRequest(url));
+        url = QUrl(configuration_->url() + "/rssLatest" );
+    netManager_.get(QNetworkRequest(url));
 }
 
 void Backend::netResponse(QNetworkReply* reply){
@@ -47,7 +47,7 @@ void Backend::netResponse(QNetworkReply* reply){
     QUrl possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     if ( !possibleRedirectUrl.isEmpty() && possibleRedirectUrl != reply->url() ) { //redirect
         qDebug() << "Http request redirected to " << possibleRedirectUrl;
-        _netManager.get(QNetworkRequest(possibleRedirectUrl));
+        netManager_.get(QNetworkRequest(possibleRedirectUrl));
         return;
     }
 
@@ -61,22 +61,21 @@ void Backend::netResponse(QNetworkReply* reply){
 }
 
 void Backend::sslError(QNetworkReply *reply, const QList<QSslError> &) {
-    if (_configuration->ignoreSslErrors())
+    if (configuration_->ignoreSslErrors())
         reply->ignoreSslErrors();
 }
 
 
 
 JenkinsStatus parseJenkinsRss(QIODevice &rss) {
+    QRegExp rx("^(.+) #([0-9]+) \\((.*)\\) (http.*)$");
+
     QXmlQuery queryEntry;
     queryEntry.bindVariable("rss", &rss);
     queryEntry.setQuery("declare default element namespace \"http://www.w3.org/2005/Atom\"; "
                    "declare variable $rss external; "
                    "for $entry in doc($rss)/feed/entry "
                    "return fn:concat($entry/title/string(), ' ', $entry/link[@type='text/html']/@href)");
-
-
-    QRegExp rx("^(.+) #([0-9]+) \\((.*)\\) (http.*)$");
 
     QStringList projects;
     if ( !queryEntry.evaluateTo(&projects) ) {

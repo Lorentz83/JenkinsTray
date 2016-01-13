@@ -44,15 +44,15 @@ void jobStatusTest::testAnd_failure()
 }
 
 void jobStatusTest::testAnd_symmetric() {
-    for (JobStatus s1 : status) {
-        for (JobStatus s2 : status) {
+    for (JobStatus s1 : status_) {
+        for (JobStatus s2 : status_) {
             QCOMPARE(s1 && s2, s2 && s1);
         }
     }
 }
 
 void jobStatusTest::testAnd_reflexive() {
-    for (JobStatus s : status) {
+    for (JobStatus s : status_) {
         QCOMPARE(s && s, s);
     }
 }

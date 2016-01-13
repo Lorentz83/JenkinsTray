@@ -3,34 +3,34 @@
 
 ConfigurationWindow::ConfigurationWindow(Configuration *config, QWidget *parent) :
     QDialog(parent),
-    _config(config),
-    ui(new Ui::ConfigurationWindow) {
-    ui->setupUi(this);
+    config_(config),
+    ui_(new Ui::ConfigurationWindow) {
+    ui_->setupUi(this);
 
-    _urlRegexp.setPattern("^https?://.*");
-    _urlRegexp.setCaseSensitivity(Qt::CaseInsensitive);
-    ui->_url->setValidator(new QRegExpValidator(_urlRegexp, this));
+    urlRegexp_.setPattern("^https?://.*");
+    urlRegexp_.setCaseSensitivity(Qt::CaseInsensitive);
+    ui_->url_->setValidator(new QRegExpValidator(urlRegexp_, this));
 }
 
 ConfigurationWindow::~ConfigurationWindow()
 {
-    delete ui;
+    delete ui_;
 }
 
 void ConfigurationWindow::accept() {
-    _config->setRefreshSec(ui->_refresh->value());
-    _config->setUrl(ui->_url->text());
-    _config->setIgnoreSslErrors(ui->_ignoreSslErrors->isChecked());
-    _config->setPlaySounds(ui->_playSounds->isChecked());
+    config_->setRefreshSec(ui_->refresh_->value());
+    config_->setUrl(ui_->url_->text());
+    config_->setIgnoreSslErrors(ui_->ignoreSslErrors_->isChecked());
+    config_->setPlaySounds(ui_->playSounds_->isChecked());
     QDialog::accept();
 }
 
 void ConfigurationWindow::setVisible(bool visible) {
     if (visible) {
-        ui->_refresh->setValue(_config->refreshSec());
-        ui->_url->setText(_config->url());
-        ui->_ignoreSslErrors->setChecked(_config->ignoreSslErrors());
-        ui->_playSounds->setChecked(_config->playSounds());
+        ui_->refresh_->setValue(config_->refreshSec());
+        ui_->url_->setText(config_->url());
+        ui_->ignoreSslErrors_->setChecked(config_->ignoreSslErrors());
+        ui_->playSounds_->setChecked(config_->playSounds());
     }
     QDialog::setVisible(visible);
 }

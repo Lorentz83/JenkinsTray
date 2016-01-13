@@ -4,7 +4,7 @@
 #include <QSettings>
 
 class Configuration {    
-    QSettings _settings;
+    QSettings settings_;
 
 public:
     int refreshMillisec() {

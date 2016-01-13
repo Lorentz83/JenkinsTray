@@ -16,16 +16,16 @@ class TrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
 
-    QSignalMapper _urlMapper;
-    QSoundEffect _failSound, _successSound;
-    QTemporaryDir *_soundDir;
-    Configuration *_config;
-    QIcon _appIcon;
-    QMenu *_buildsMenu;
-    QMap<JobStatus, QIcon> _icons;
-    QMap<QString, JobStatus> _oldStatus;
-    bool _lastUpdateWasError;
-    QString _lastErrorMessage;
+    QSignalMapper urlMapper_;
+    QSoundEffect _failSound, successSound_;
+    QTemporaryDir *soundDir_;
+    Configuration *config_;
+    QIcon appIcon_;
+    QMenu *buildsMenu_;
+    QMap<JobStatus, QIcon> icons_;
+    QMap<QString, JobStatus> oldStatus_;
+    bool lastUpdateWasError_;
+    QString lastErrorMessage_;
 
 protected slots:
     void openUrl(const QString& url);

@@ -11,8 +11,8 @@
 class Backend : public QObject
 {
     Q_OBJECT
-    Configuration *_configuration;
-    QNetworkAccessManager _netManager;
+    Configuration *configuration_;
+    QNetworkAccessManager netManager_;
 
 public:
     explicit Backend(Configuration *configuration, QObject *parent = 0);

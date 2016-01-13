@@ -13,9 +13,9 @@ class ConfigurationWindow;
 class ConfigurationWindow : public QDialog
 {
     Q_OBJECT
-    Configuration *_config;
-    Ui::ConfigurationWindow *ui;
-    QRegExp _urlRegexp;
+    Configuration *config_;
+    Ui::ConfigurationWindow *ui_;
+    QRegExp urlRegexp_;
 
 public slots:
     virtual void accept();
